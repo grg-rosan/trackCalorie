@@ -36,7 +36,7 @@ class CalorieTracker {
     }
 
     removeMeal(id) {
-        const index = this._meals.findIndex((meal) => { meal.id === id });
+        const index = this._meals.findIndex((meal) =>  meal.id === id );
         if (index !== -1) {
             const meal = this._meals[index];
             this._totalCalories -= meal.calories;
@@ -48,10 +48,11 @@ class CalorieTracker {
     }
 
     removeWorkout(id) {
-        const index = this._workouts.findIndex((workout) => { workout.id === id });
+        const index = this._workouts.findIndex((workout) =>  workout.id === id );
+        
         if (index !== -1) {
             const workout = this._workouts[index];
-            this._totalCalories -= workout.calories;
+            this._totalCalories += workout.calories;
             Storage.updateTotalCalories(this._totalCalories)
             this._workouts.splice(index, 1);
             Storage.removeWorkout(id);
@@ -240,8 +241,8 @@ class Storage {
     }
 
     static updateTotalCalories(calories) {
-        localStorage.setItem('totalCalories', calories)
-    }
+    localStorage.setItem('totalCalories', calories);
+  }
 
     static getMeals(){
         let meals;
@@ -259,15 +260,11 @@ class Storage {
         localStorage.setItem('meals', JSON.stringify(meals))
     }
 
-    static removeMeal(id){
-        const meals =Storage.getMeals();
-        meals.forEach((meal,index) => {
-            if(meal.id === id){ 
-                meals.splice(index, 1) 
-            } 
-        })
-        localStorage.setItem('meals',JSON.stringify(meals))
-    }
+static removeMeal(id) {
+    const meals = Storage.getMeals().filter(meal => meal.id !== id);
+    localStorage.setItem('meals', JSON.stringify(meals));
+}
+
 
     static getWorkouts() {
     let workouts;
@@ -285,20 +282,15 @@ class Storage {
     localStorage.setItem('workouts', JSON.stringify(workouts));
   }
 
-  static removeWorkout(id) {
-    const workouts = Storage.getWorkouts();
-    workouts.forEach((workout, index) => {
-      if (workout.id === id) {
-        workouts.splice(index, 1);
-      }
-    });
-
+ static removeWorkout(id) {
+    const workouts = Storage.getWorkouts().filter(workout => workout.id !== id);
     localStorage.setItem('workouts', JSON.stringify(workouts));
-  }
+}
+
     static clearAll(){
         localStorage.removeItem('totalCalories')
         localStorage.removeItem('meals')
-        localStorage.removeItem('workout')
+        localStorage.removeItem('workouts')
 
 
         // if i want to remove everything
@@ -336,11 +328,10 @@ class App {
             .addEventListener('click', this._removeItems.bind(this, 'workout'))//we bind because we target parent elem
 
         document.getElementById('filter-meals')
-            .addEventListener('keyup', this._filterItems.bind(this, 'meals'))
-
+            .addEventListener('keyup', this._filterItems.bind(this, 'meals'));
 
         document.getElementById('filter-workouts')
-            .addEventListener('keyup', this._filterItems.bind(this, 'workout'))
+            .addEventListener('keyup', this._filterItems.bind(this, 'workouts'));
 
         document.getElementById('reset')
             .addEventListener('click', this._reset.bind(this, 'meal'))
